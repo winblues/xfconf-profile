@@ -14,17 +14,13 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: '1.24'
+        uses: actions/setup-go@v5
 
-      - name: Install goreleaser
-        uses: goreleaser/goreleaser-action@v4
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
         with:
+          distribution: goreleaser
           version: 'latest'
-
-      - name: Run goreleaser
+          args: release --clean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Required for GitHub releases
-        run: |
-          goreleaser release
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
