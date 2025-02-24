@@ -9,32 +9,32 @@ import (
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "xfconf-profile",
-		Short: "A CLI tool for managing Xfconf profiles",
+		Short: "A CLI tool for managing Xfce profiles",
 	}
 
 	var applyCmd = &cobra.Command{
 		Use:   "apply [path]",
-		Short: "Apply an Xfconf profile from a JSON file",
+		Short: "Apply changes from a profile.json",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Applying Xfconf profile from %s\n", args[0])
+			applyProfile(args[0])
 		},
 	}
 
 	var revertCmd = &cobra.Command{
 		Use:   "revert [path]",
-		Short: "Revert an Xfconf profile from a JSON file",
+		Short: "Revert changes from a profile.json",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("Reverting Xfconf profile from %s\n", args[0])
+			revertProfile(args[0])
 		},
 	}
 
 	var recordCmd = &cobra.Command{
 		Use:   "record",
-		Short: "Record the current Xfconf profile to a JSON file",
+		Short: "Record changes to xsettings and dump them as a profile on SIGINT",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Recording current Xfconf profile")
+			recordProfile()
 		},
 	}
 
@@ -45,4 +45,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
