@@ -13,7 +13,7 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
 
 archives:
-  - format: tar.gz
+  - formats: ["tar.gz"]
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
@@ -26,7 +26,7 @@ release:
     name: xfconf-profile
   draft: false
   prerelease: false
-  name_template: "{{ .ProjectName }} {{ .Version }}"
+  name_template: "{{ .ProjectName }}-v{{ .Version }}"
   extra_files:
     - glob: "*.tar.gz"
 
