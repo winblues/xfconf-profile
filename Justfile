@@ -7,5 +7,5 @@ release version="0.2.0":
   #!/bin/bash
   . .env
   git tag v{{version}}
-  goreleaser release --rm-dist
+  goreleaser release
 
