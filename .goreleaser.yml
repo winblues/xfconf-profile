@@ -11,13 +11,9 @@ builds:
       - -trimpath
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+    binary: xfconf-profile-linux-amd64
 
-archives:
-  - formats: ["tar.gz"]
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    files:
-      - LICENSE
-      - README.md
+archives: []
 
 # Release configurations
 release:
@@ -28,7 +24,7 @@ release:
   prerelease: false
   name_template: "{{ .ProjectName }}-v{{ .Version }}"
   extra_files:
-    - glob: "*.tar.gz"
+    - glob: "xfconf-profile-linux-amd64"
 
 checksum:
   name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
