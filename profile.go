@@ -1,84 +1,83 @@
 package main
 
 import (
-    "encoding/json"
-    "errors"
-    "fmt"
-    "io/ioutil"
-    "os"
-    "os/exec"
-    "path/filepath"
-    "strings"
-    "github.com/fatih/color"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/fatih/color"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 func applyProfile(profilePath string) error {
-    data, err := ioutil.ReadFile(profilePath)
-    if err != nil {
-        return fmt.Errorf("failed to read file: %v", err)
-    }
+	data, err := ioutil.ReadFile(profilePath)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %v", err)
+	}
 
-    var profile map[string]map[string]interface{}
-    err = json.Unmarshal(data, &profile)
-    if err != nil {
-        return fmt.Errorf("failed to parse JSON: %v", err)
-    }
+	var profile map[string]map[string]interface{}
+	err = json.Unmarshal(data, &profile)
+	if err != nil {
+		return fmt.Errorf("failed to parse JSON: %v", err)
+	}
 
-    blue := color.New(color.FgHiBlue).SprintFunc()
+	blue := color.New(color.FgHiBlue).SprintFunc()
 
-    for channel, properties := range profile {
-        // Keys starting with X- are not channels
-        if strings.HasPrefix(channel, "X-") {
-            continue
-        }
-        for property, value := range properties {
-            fmt.Printf("%s Setting %s::%s ➔ %s\n", blue("•"), channel, property, value)
-            cmd := exec.Command("xfconf-query", "-c", channel, "--property", property, "--type", "string", "--create", "--set", fmt.Sprintf("%v", value))
+	for channel, properties := range profile {
+		// Keys starting with X- are not channels
+		if strings.HasPrefix(channel, "X-") {
+			continue
+		}
+		for property, value := range properties {
+			fmt.Printf("%s Setting %s::%s ➔ %s\n", blue("•"), channel, property, value)
+			cmd := exec.Command("xfconf-query", "-c", channel, "--property", property, "--type", "string", "--create", "--set", fmt.Sprintf("%v", value))
 
-            output, err := cmd.CombinedOutput()
-            if err != nil {
-                return fmt.Errorf("failed to run command: %v\nOutput: %s", err, string(output))
-            }
-        }
-    }
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				return fmt.Errorf("failed to run command: %v\nOutput: %s", err, string(output))
+			}
+		}
+	}
 
-    return nil
+	return nil
 }
 
 func revertProfile(profilePath string) error {
-    data, err := ioutil.ReadFile(profilePath)
-    if err != nil {
-        return fmt.Errorf("failed to read file: %v", err)
-    }
+	data, err := ioutil.ReadFile(profilePath)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %v", err)
+	}
 
-    var profile map[string]map[string]interface{}
-    err = json.Unmarshal(data, &profile)
-    if err != nil {
-        return fmt.Errorf("failed to parse JSON: %v", err)
-    }
+	var profile map[string]map[string]interface{}
+	err = json.Unmarshal(data, &profile)
+	if err != nil {
+		return fmt.Errorf("failed to parse JSON: %v", err)
+	}
 
-    yellow := color.New(color.FgHiYellow).SprintFunc() 
+	yellow := color.New(color.FgHiYellow).SprintFunc()
 
-    for channel, properties := range profile {
-        // Keys starting with X- are not channels
-        if strings.HasPrefix(channel, "X-") {
-            continue
-        }
+	for channel, properties := range profile {
+		// Keys starting with X- are not channels
+		if strings.HasPrefix(channel, "X-") {
+			continue
+		}
 
-        for property := range properties {
-            fmt.Printf("%s Resetting %s::%s\n", yellow("•"), channel, property)
-            cmd := exec.Command("xfconf-query", "-c", channel, "--reset", "--property", property)
+		for property := range properties {
+			fmt.Printf("%s Resetting %s::%s\n", yellow("•"), channel, property)
+			cmd := exec.Command("xfconf-query", "-c", channel, "--reset", "--property", property)
 
-            output, err := cmd.CombinedOutput()
-            if err != nil {
-                return fmt.Errorf("failed to run command: %v\nOutput: %s", err, string(output))
-            }
-        }
-    }
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				return fmt.Errorf("failed to run command: %v\nOutput: %s", err, string(output))
+			}
+		}
+	}
 
-    return nil
+	return nil
 }
-
 
 // Create $XDG_STATE_HOME/xfconf-profile/sync if needed
 func ensureStateDir() (string, error) {
@@ -136,10 +135,10 @@ func syncProfile(distConfig string) error {
 		return err
 	}
 
-  _, err = os.Stat(distConfig)
-  if err != nil {
-    return err
-  }
+	_, err = os.Stat(distConfig)
+	if err != nil {
+		return err
+	}
 
 	currentDir := filepath.Join(stateDirPath, "current")
 	previousDir := filepath.Join(stateDirPath, "previous")
