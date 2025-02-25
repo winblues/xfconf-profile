@@ -20,3 +20,13 @@ Setting xsettings::/Net/ThemeName => Chicago95
 $ xfconf-profile revert profile.json
 Resetting xsettings::/Net/ThemeName
 ```
+
+## Design and Goals
+
+This projects goals are:
+  1. Define a schema for xfconf profiles that can be declaratively defined and provided by a distribution
+  2. Provide a tool as a static binary that can modify a user's xfconf settings based on this config
+
+This project is a core component of [winblues/vauxite](https://github.com/winblues/vauxite).
+
+Thanks to https://github.com/jamescherti/watch-xfce-xfconf for the inspiration. 
