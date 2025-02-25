@@ -35,6 +35,6 @@ Thanks to https://github.com/jamescherti/watch-xfce-xfconf for the inspiration.
 This project includes derivative work from the following third-party projects:
 
 - **watch-xfce-xfconf** by James Cherti
-  Source: [https://github.com/jamescherti/watch-xfce-xfconf](https://github.com/jamescherti/watch-xfce-xfconf)
-  License: MIT License
-  Copyright (C) 2021-2025 James Cherti
+  - Source: [https://github.com/jamescherti/watch-xfce-xfconf](https://github.com/jamescherti/watch-xfce-xfconf)
+  - License: MIT License
+  - Copyright (C) 2021-2025 James Cherti
