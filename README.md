@@ -15,10 +15,9 @@ Given a simple `profile.json` file:
 Applying and reverting the changes from the profile:
 ```bash
 $ xfconf-profile apply profile.json
-Setting xsettings::/Net/ThemeName => Chicago95
-
+• Setting xsettings::/Net/ThemeName ➔ Chicago95
 $ xfconf-profile revert profile.json
-Resetting xsettings::/Net/ThemeName
+• Resetting xsettings::/Net/ThemeName
 ```
 
 ## Design and Goals
