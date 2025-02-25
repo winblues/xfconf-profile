@@ -9,7 +9,7 @@ import (
 func main() {
     var rootCmd = &cobra.Command{
         Use:   "xfconf-profile",
-        Short: "A CLI tool for managing Xfce profiles",
+        Short: "Tool for applying, reverting and managing Xfce profiles",
     }
 
     var applyCmd = &cobra.Command{
