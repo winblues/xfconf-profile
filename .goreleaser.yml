@@ -24,7 +24,7 @@ release:
   prerelease: false
   name_template: "{{ .ProjectName }}-v{{ .Version }}"
   extra_files:
-    - glob: "xfconf-profile-linux-amd64"
+    - glob: "./**/xfconf-profile-linux-amd64"
 
 checksum:
   name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
