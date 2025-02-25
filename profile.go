@@ -65,7 +65,3 @@ func revertProfile(profilePath string) error {
 
     return nil
 }
-
-func recordProfile() {
-    fmt.Printf("TODO\n")
-}
