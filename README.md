@@ -36,7 +36,7 @@ $ xfconf-profile revert profile.json
 mkdir ~/.local/bin
 curl -L -o ~/.local/bin/xfconf-profile \
   https://github.com/winblues/xfconf-profile/releases/latest/download/xfconf-profile-linux-amd64
-chmod +x 
+chmod +x ~/.local/bin/xfconf-profile
 ```
 
 ## Design and Goals
