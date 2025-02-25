@@ -2,6 +2,7 @@
 
 xfconf-profile is a command-line tool to manage Xfce settings using `xfconf-query`. Profiles are simple JSON documents containing only properties that differ from the default values.
 
+
 ## Example usage
 
 Given a simple `profile.json` file:
@@ -30,21 +31,24 @@ $ xfconf-profile revert profile.json
 • Resetting xsettings::/Net/ThemeName
 ```
 
+## Installation
+```bash
+mkdir ~/.local/bin
+curl -L -o ~/.local/bin/xfconf-profile \
+  https://github.com/winblues/xfconf-profile/releases/latest/download/xfconf-profile-linux-amd64
+chmod +x 
+```
+
 ## Design and Goals
 
-This projects goals are:
+This project is a core component of [winblues/vauxite](https://github.com/winblues/vauxite) and partly inspired by [jamescherti/watch-xfce-xfconf](https://github.com/jamescherti/watch-xfce-xfconf).
+
+Our goals are:
   1. Define a schema for xfconf profiles that can be declaratively defined and provided by a distribution
   2. Provide a tool as a static binary that can modify a user's xfconf settings based on this config
 
-This project is a core component of [winblues/vauxite](https://github.com/winblues/vauxite).
-
-Thanks to https://github.com/jamescherti/watch-xfce-xfconf for the inspiration. 
-
-## Third-Party Code
+## Thanks
 
 This project includes derivative work from the following third-party projects:
 
-- **watch-xfce-xfconf** by James Cherti
-  - Source: [https://github.com/jamescherti/watch-xfce-xfconf](https://github.com/jamescherti/watch-xfce-xfconf)
-  - License: MIT License
-  - Copyright (C) 2021-2025 James Cherti
+- [jamescherti/watch-xfce-xfconf](https://github.com/jamescherti/watch-xfce-xfconf) - MIT License - Copyright (C) 2021-2025 James Cherti
