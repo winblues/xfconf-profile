@@ -17,7 +17,10 @@ func main() {
         Short: "Apply changes from a profile.json",
         Args:  cobra.ExactArgs(1),
         Run: func(cmd *cobra.Command, args []string) {
-            applyProfile(args[0])
+            err := applyProfile(args[0])
+            if err != nil {
+              fmt.Printf("Error: %s\n", err)
+            }
         },
     }
 
@@ -26,7 +29,10 @@ func main() {
         Short: "Revert changes from a profile.json",
         Args:  cobra.ExactArgs(1),
         Run: func(cmd *cobra.Command, args []string) {
-            revertProfile(args[0])
+            err := revertProfile(args[0])
+            if err != nil {
+              fmt.Printf("Error: %s\n", err)
+            }
         },
     }
 

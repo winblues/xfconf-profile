@@ -5,6 +5,7 @@ import (
     "fmt"
     "io/ioutil"
     "os/exec"
+    "strings"
     "github.com/fatih/color"
 )
 
@@ -23,6 +24,10 @@ func applyProfile(profilePath string) error {
     blue := color.New(color.FgHiBlue).SprintFunc()
 
     for channel, properties := range profile {
+        // Keys starting with X- are not channels
+        if strings.HasPrefix(channel, "X-") {
+            continue
+        }
         for property, value := range properties {
             fmt.Printf("%s Setting %s::%s ➔ %s\n", blue("•"), channel, property, value)
             cmd := exec.Command("xfconf-query", "-c", channel, "--property", property, "--set", fmt.Sprintf("%v", value))
@@ -52,6 +57,11 @@ func revertProfile(profilePath string) error {
     yellow := color.New(color.FgHiYellow).SprintFunc() 
 
     for channel, properties := range profile {
+        // Keys starting with X- are not channels
+        if strings.HasPrefix(channel, "X-") {
+            continue
+        }
+
         for property := range properties {
             fmt.Printf("%s Resetting %s::%s\n", yellow("•"), channel, property)
             cmd := exec.Command("xfconf-query", "-c", channel, "--reset", "--property", property)
