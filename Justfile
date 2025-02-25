@@ -1,7 +1,7 @@
 build:
   rm -rf build
   mkdir build
-  go build -o build/xfconf-profile
+  go build -o build/xfconf-profile ./...
 
 release version="0.2.0":
   git tag v{{version}}
