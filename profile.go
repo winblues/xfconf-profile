@@ -5,6 +5,7 @@ import (
     "fmt"
     "io/ioutil"
     "os/exec"
+    "github.com/fatih/color"
 )
 
 func applyProfile(profilePath string) error {
@@ -19,9 +20,11 @@ func applyProfile(profilePath string) error {
         return fmt.Errorf("failed to parse JSON: %v", err)
     }
 
+    blue := color.New(color.FgHiBlue).SprintFunc()
+
     for channel, properties := range profile {
         for property, value := range properties {
-      fmt.Printf("Setting %s::%s ➔ %s\n", channel, property, value)
+            fmt.Printf("%s Setting %s::%s ➔ %s\n", blue("•"), channel, property, value)
             cmd := exec.Command("xfconf-query", "-c", channel, "--property", property, "--set", fmt.Sprintf("%v", value))
 
             output, err := cmd.CombinedOutput()
@@ -46,9 +49,11 @@ func revertProfile(profilePath string) error {
         return fmt.Errorf("failed to parse JSON: %v", err)
     }
 
+    yellow := color.New(color.FgHiYellow).SprintFunc() 
+
     for channel, properties := range profile {
         for property := range properties {
-      fmt.Printf("Resetting %s::%s\n", channel, property)
+            fmt.Printf("%s Resetting %s::%s\n", yellow("•"), channel, property)
             cmd := exec.Command("xfconf-query", "-c", channel, "--reset", "--property", property)
 
             output, err := cmd.CombinedOutput()
