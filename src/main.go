@@ -6,6 +6,12 @@ import (
 	"os"
 )
 
+// Version imformation overriden using ldflags
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
 var applyCmd = &cobra.Command{
 	Use:   "apply [path]",
 	Short: "Apply changes from a profile.json",
@@ -50,6 +56,16 @@ var syncCmd = &cobra.Command{
 	},
 }
 
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Print version information",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("xfconf-profile version %s\n", version)
+		fmt.Printf("Commit: %s\n", commit)
+		fmt.Printf("Build date: %s\n", date)
+	},
+}
+
 func init() {
 	syncCmd.Flags().StringP("profile", "p", "/usr/share/xfconf-profile/default.json", "Path to the distribution's recommended profile")
 }
@@ -59,7 +75,7 @@ func main() {
 		Use:   "xfconf-profile",
 		Short: "Tool for applying, reverting and managing Xfce profiles",
 	}
-	rootCmd.AddCommand(applyCmd, revertCmd, recordCmd, syncCmd)
+	rootCmd.AddCommand(applyCmd, revertCmd, recordCmd, syncCmd, versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
