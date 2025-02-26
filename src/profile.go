@@ -37,9 +37,18 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude Exclu
 		}
 
 		for property, value := range properties {
-			// Check if this property can be updated based on merge preferences
+			// Check if this property should be skipped based on merge preferences
+			if mergeBehavior == MergeSoft {
+				currentValue := "currentValue"
+				defaultValue := "defaultValue"
 
-			if exclude.IsExcluded(channel, property) {
+				if currentValue != defaultValue {
+					fmt.Printf("%s Skipping property %s with non-default value %s (default=%s)%s\n", yellow("•"), channel, property, currentValue, defaultValue)
+					continue
+				}
+			}
+
+			if exclude.IsExcluded(channel, property) && mergeBehavior != MergeForce {
 				fmt.Printf("%s Skipping excluded property %s%s\n", yellow("•"), channel, property)
 				continue
 			}
@@ -91,8 +100,6 @@ func revertProfile(profilePath string, exclude ExcludePatterns, dryRun bool) err
 		}
 
 		for property := range properties {
-			// Check if this property can be updated based on merge preferences
-
 			if exclude.IsExcluded(channel, property) {
 				fmt.Printf("%s Skipping excluded property %s%s\n", yellow("•"), channel, property)
 				continue
