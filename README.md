@@ -39,6 +39,36 @@ curl -L -o ~/.local/bin/xfconf-profile \
 chmod +x ~/.local/bin/xfconf-profile
 ```
 
+## Configuration
+
+xfconf-profile can be configured via a config file at `$XDG_CONFIG_HOME/xfconf-profile/config.yml`. This file is created on first use. The most up-to-date version of this file can be found at [src/assets/config.yml](https://github.com/winblues/xfconf-profile/blob/main/src/assets/config.yml).
+
+```yaml
+# Merge behavior for applying properties
+# Options are:
+#   - soft:  Only change properties if they are set to their default values.
+#            This is the default behavior as it preserves changes to properties
+#            that users have manually configured.
+#   - hard:  Change all properties not explicitly excluded
+#   - force: Change all propertiess
+merge: "soft"
+
+# List of properties to exclude when applying profiles. Each entry is a
+# regular expression on the fully qualified name of the property
+#
+# Example:
+#   exclude:
+#     - "^xsettings/Net/ThemeName$" # Specific property
+#     - "^xsettings/Net"            # Everything starting with /Net in the xsettings channel
+#     - "^xfwm4"                    # Everything in the xfwm4 channel
+#     - "mycustomname"              # Everything containing the string "mycustomname"
+exclude: []
+
+# Enable or disable the sync feature that winblues uses on login
+sync:
+  auto: true
+```
+
 ## Design and Goals
 
 This project is a core component of [winblues/vauxite](https://github.com/winblues/vauxite) and partly inspired by [jamescherti/watch-xfce-xfconf](https://github.com/jamescherti/watch-xfce-xfconf).

@@ -1,9 +1,5 @@
 version: 1
 
-# Enable or disable the sync feature that winblues uses on login
-sync:
-  auto: true
-
 # Merge behavior for applying properties
 # Options are:
 #   - soft:  Only change properties if they are set to their default values.
@@ -23,3 +19,7 @@ merge: "soft"
 #     - "^xfwm4"                    # Everything in the xfwm4 channel
 #     - "mycustomname"              # Everything containing the string "mycustomname"
 exclude: []
+
+# Enable or disable the sync feature that winblues uses on login
+sync:
+  auto: true
