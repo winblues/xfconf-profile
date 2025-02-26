@@ -103,12 +103,13 @@ func revertProfile(profilePath string, exclude ExcludePatterns, dryRun bool) err
 				dryRunNotice = " (skipping due to dry run)"
 			}
 
+			fmt.Printf("%s Resetting %s%s%s\n", blue("•"), channel, property, dryRunNotice)
+
 			if dryRun {
 				continue
 			}
 
-			// We can definitely set this property now
-			fmt.Printf("%s Resetting %s%s%s\n", blue("•"), channel, property, dryRunNotice)
+			// We can definitely reset this property now
 			cmd := exec.Command("xfconf-query", "-c", channel, "--reset", "--property", property)
 
 			output, err := cmd.CombinedOutput()
