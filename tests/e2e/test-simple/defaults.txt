@@ -1,3 +1,0 @@
-xsettings/Net/ThemeName default
-xsettings/Net/IconThemeName default
-xfwm4/general/theme default

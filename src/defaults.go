@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -22,6 +24,8 @@ func gatherDefaultPropertyValuesFromConfig(queries map[string][]string, configDi
 	if err != nil {
 		return nil, fmt.Errorf("no xfconfd found at %s", xfconfdPath)
 	}
+
+	logger.Debug("Using config dir", "XDG_CONFIG_HOME", configDir)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -93,12 +97,14 @@ func gatherDefaultPropertyValuesFromConfig(queries map[string][]string, configDi
 
 func gatherDefaultPropertyValues(queries map[string][]string) (map[string]map[string]string, error) {
 	// Special case to use the test's default values if running end-to-end-test
-	if _, exists := os.LookupEnv("XFCONF_PANEL_END_TO_END_TEST"); exists {
+	_, underTest := os.LookupEnv("XFCONF_PROFILE_END_TO_END_TEST")
+	if underTest {
 		cwd, err := os.Getwd()
 		if err != nil {
 			return nil, fmt.Errorf("Cannot get working directory")
 		}
-		return gatherDefaultPropertyValuesFromConfig(queries, cwd)
+		testConfigDir := filepath.Join(cwd, "..", "etc", "xdg")
+		return gatherDefaultPropertyValuesFromConfig(queries, testConfigDir)
 	}
 
 	configDir := "/usr/etc/xdg"
@@ -114,4 +120,38 @@ func gatherDefaultPropertyValues(queries map[string][]string) (map[string]map[st
 	}
 
 	return gatherDefaultPropertyValuesFromConfig(queries, configDir)
+}
+
+func gatherCurrentPropertyValues(queries map[string][]string) (map[string]map[string]string, error) {
+	results := make(map[string]map[string]string)
+
+	for channel, properties := range queries {
+		results[channel] = make(map[string]string)
+
+		for _, property := range properties {
+			cmd := exec.Command("xfconf-query", "--channel", channel, "--property", property)
+
+			var stdout, stderr bytes.Buffer
+			cmd.Stdout = &stdout
+			cmd.Stderr = &stderr
+
+			err := cmd.Run()
+
+			if err != nil {
+				// If there was an error (property not found)
+				results[channel][property] = ""
+				continue
+			}
+
+			// Read the output value
+			scanner := bufio.NewScanner(&stdout)
+			if scanner.Scan() {
+				results[channel][property] = scanner.Text()
+			} else {
+				results[channel][property] = ""
+			}
+		}
+	}
+
+	return results, nil
 }

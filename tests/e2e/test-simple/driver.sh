@@ -9,6 +9,9 @@ if ! which xfconf-query | grep -q "/xfconf-profile/"; then
   exit 1
 fi
 
+export XFCONF_PROFILE_END_TO_END_TEST=1
+export LOG_LEVEL=debug
+
 xfconf-profile apply profile.json
 
 if diff expected-log.txt actual-log.txt; then

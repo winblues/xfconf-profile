@@ -30,6 +30,25 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude Exclu
 	blue := color.New(color.FgHiBlue).SprintFunc()
 	yellow := color.New(color.FgHiYellow).SprintFunc()
 
+	// Get all the default values
+	defaultValueQueries := make(map[string][]string)
+	for channel, properties := range profile {
+		defaultValueQueries[channel] = []string{}
+		for property, _ := range properties {
+			defaultValueQueries[channel] = append(defaultValueQueries[channel], property)
+		}
+	}
+
+	defaultValues, err := gatherDefaultPropertyValues(defaultValueQueries)
+	if err != nil {
+		return fmt.Errorf("could not get default property values: %v", err)
+	}
+
+	currentValues, err := gatherCurrentPropertyValues(defaultValueQueries)
+	if err != nil {
+		return fmt.Errorf("could not get current property values: %v", err)
+	}
+
 	for channel, properties := range profile {
 		// Keys starting with X- are not channels
 		if strings.HasPrefix(channel, "X-") {
@@ -39,12 +58,15 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude Exclu
 		for property, value := range properties {
 			// Check if this property should be skipped based on merge preferences
 			if mergeBehavior == MergeSoft {
-				currentValue := "currentValue"
-				defaultValue := "defaultValue"
+				defaultValue := defaultValues[channel][property]
+				currentValue := currentValues[channel][property]
 
-				if currentValue != defaultValue {
-					fmt.Printf("%s Skipping property %s with non-default value %s (default=%s)%s\n", yellow("•"), channel, property, currentValue, defaultValue)
-					continue
+				// If there's actually a default and we have an actual current value
+				if defaultValue != "" && currentValue != "" {
+					if currentValue != defaultValue {
+						fmt.Printf("%s Skipping property %s%s with non-default value %s (default=%s)\n", yellow("•"), channel, property, currentValue, defaultValue)
+						continue
+					}
 				}
 			}
 
