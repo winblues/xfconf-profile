@@ -1,14 +1,24 @@
 version: 1
 
-# To completely disable the sync feature that winblues uses on login,
-# set this to false
+# Enable or disable the sync feature that winblues uses on login
 sync:
-  enable: true
+  auto: true
 
-merge:
+# Default merge behavior for properties
+# Options are:
+#   - soft:  Only change properties if they are set to their default values.
+#            This is the default behavior as it preserves changes to properties
+#            that users have manually configured.
+#   - hard:  Change all properties not explictly excluded
+#   - force: Change all propertiess
+merge: "soft"
 
-# List of properties to exclude.
+# List of properties to exclude when applying profiles. Each entry is a
+# regular expression on the structured name of the property
+#
 # Example:
 #   exclude:
-#     - "xsettings::*"
+#     - "xsettings/Net/ThemeName"
+#     - "xsettings/Net.*"
+#     - "xfwm4.*"
 exclude: []

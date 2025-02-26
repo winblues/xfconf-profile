@@ -15,7 +15,7 @@ var defaultConfig []byte
 type Config struct {
 	Version int `yaml:"version"`
 	Sync    struct {
-		Enable bool `yaml:"enable"`
+		Auto bool `yaml:"auto"`
 	} `yaml:"sync"`
 	Merge   struct{} `yaml:"merge"`
 	Exclude []string `yaml:"exclude"`

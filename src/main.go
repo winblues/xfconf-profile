@@ -19,8 +19,10 @@ func syncCmd(cfg *Config) *cobra.Command {
 		Use:   "sync",
 		Short: "Sync user profile with distribution's recommended profile",
 		Run: func(cmd *cobra.Command, args []string) {
-			if !cfg.Sync.Enable {
-				fmt.Println("Skipping sync -- disabled in user config")
+			auto, _ := cmd.Flags().GetBool("auto")
+
+			if auto && !cfg.Sync.Auto {
+				fmt.Println("Auto sync disabled in user config")
 				return
 			}
 
@@ -31,8 +33,8 @@ func syncCmd(cfg *Config) *cobra.Command {
 			}
 		},
 	}
-
 	cmd.Flags().StringP("profile", "p", "/usr/share/xfconf-profile/default.json", "Path to the distribution's recommended profile")
+	cmd.Flags().Bool("auto", false, "Set when running as a user-level systemd unit by the distribution")
 	return cmd
 }
 

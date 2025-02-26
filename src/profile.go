@@ -12,6 +12,7 @@ import (
 	"github.com/fatih/color"
 )
 
+// TODO: return a new profile that only includes properties that were actually changed based on the user's merge options / current settings.
 func applyProfile(profilePath string) error {
 	data, err := os.ReadFile(profilePath)
 	if err != nil {
@@ -156,6 +157,11 @@ func syncProfile(distConfig string) error {
 		}
 	}
 
+	// TODO: applyProfile should return a new profile that only includes properties that
+	// were actually changed based on the user's merge options / current settings. We can
+	// still copy the distConfig but we should call it something like profile.json.orig to
+	// indicate that this is just for reference
+	//
 	// First run: initialize current directory
 	if _, err := os.Stat(currentDir); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Empty state")
