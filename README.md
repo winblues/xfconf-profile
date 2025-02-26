@@ -74,8 +74,8 @@ sync:
 This project is a core component of [winblues/vauxite](https://github.com/winblues/vauxite) and partly inspired by [jamescherti/watch-xfce-xfconf](https://github.com/jamescherti/watch-xfce-xfconf).
 
 Our goals are:
-  1. Define a schema for xfconf profiles that can be declaratively defined and provided by a distribution
-  2. Provide a tool as a static binary that can modify a user's xfconf settings based on this config
+  1. Define a schema for Xfce profiles that can be declaratively defined and provided by a distribution such as [blue95](https://github.com/winblues/blue95).
+  2. Provide a tool as a static binary that can modify a user's xfconf settings based on such configs.
 
 ## Thanks
 
