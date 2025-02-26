@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/fatih/color"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 func applyProfile(profilePath string) error {
-	data, err := ioutil.ReadFile(profilePath)
+	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %v", err)
 	}
@@ -46,7 +46,7 @@ func applyProfile(profilePath string) error {
 }
 
 func revertProfile(profilePath string) error {
-	data, err := ioutil.ReadFile(profilePath)
+	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %v", err)
 	}
@@ -102,13 +102,13 @@ func ensureStateDir() (string, error) {
 }
 
 func copyDistConfig(distConfig string, currentDir string) error {
-	defaultConfigData, err := ioutil.ReadFile(distConfig)
+	defaultConfigData, err := os.ReadFile(distConfig)
 	if err != nil {
 		return fmt.Errorf("failed to read config: %v", err)
 	}
 
 	currentConfigPath := filepath.Join(currentDir, "profile.json")
-	if err := ioutil.WriteFile(currentConfigPath, defaultConfigData, 0644); err != nil {
+	if err := os.WriteFile(currentConfigPath, defaultConfigData, 0644); err != nil {
 		return fmt.Errorf("failed to write current config: %v", err)
 	}
 
@@ -116,12 +116,12 @@ func copyDistConfig(distConfig string, currentDir string) error {
 }
 
 func compareFiles(file1, file2 string) (bool, error) {
-	data1, err := ioutil.ReadFile(file1)
+	data1, err := os.ReadFile(file1)
 	if err != nil {
 		return false, fmt.Errorf("failed to read %s: %v", file1, err)
 	}
 
-	data2, err := ioutil.ReadFile(file2)
+	data2, err := os.ReadFile(file2)
 	if err != nil {
 		return false, fmt.Errorf("failed to read %s: %v", file2, err)
 	}
