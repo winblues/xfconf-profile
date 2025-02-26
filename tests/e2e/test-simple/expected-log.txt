@@ -1,0 +1,3 @@
+action=set-property property=xsettings/Net/IconThemeName value=Chicago95
+action=set-property property=xsettings/Net/ThemeName value=Chicago95
+action=set-property property=xfwm4/general/theme value=Chicago95
