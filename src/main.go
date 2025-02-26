@@ -34,6 +34,7 @@ func syncCmd(cfg *Config) *cobra.Command {
 		Short: "Sync user profile with distribution's recommended profile",
 		Run: func(cmd *cobra.Command, args []string) {
 			auto, _ := cmd.Flags().GetBool("auto")
+			dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 			if auto && !cfg.Sync.Auto {
 				fmt.Println("Auto sync disabled in user config")
@@ -44,7 +45,7 @@ func syncCmd(cfg *Config) *cobra.Command {
 			mergeBehavior := chooseMergeBehavior(cfg, mergeFlag)
 
 			distProfile, _ := cmd.Flags().GetString("profile")
-			if err := syncProfile(distProfile, mergeBehavior, cfg.Exclude); err != nil {
+			if err := syncProfile(distProfile, mergeBehavior, cfg.Exclude, dryRun); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 				os.Exit(1)
 			}
@@ -52,7 +53,9 @@ func syncCmd(cfg *Config) *cobra.Command {
 	}
 	cmd.Flags().StringP("profile", "p", "/usr/share/xfconf-profile/default.json", "Path to the distribution's recommended profile")
 	cmd.Flags().StringP("merge", "m", "", "Set merge behavior (soft, hard, force)")
+	cmd.Flags().Bool("dry-run", false, "Only print what would be changed")
 	cmd.Flags().Bool("auto", false, "Flag indicating running as a user-level systemd unit by the distribution")
+
 	return cmd
 }
 
@@ -62,17 +65,20 @@ func applyCmd(cfg *Config) *cobra.Command {
 		Short: "Apply changes from a profile.json",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 			mergeFlag, _ := cmd.Flags().GetString("merge")
 			mergeBehavior := chooseMergeBehavior(cfg, mergeFlag)
 
-			err := applyProfile(args[0], mergeBehavior, cfg.Exclude)
+			err := applyProfile(args[0], mergeBehavior, cfg.Exclude, dryRun)
 			if err != nil {
 				fmt.Printf("Error: %s\n", err)
 			}
 		},
 	}
+
 	cmd.Flags().StringP("merge", "m", "soft", "Set merge behavior (soft, hard, force)")
+	cmd.Flags().Bool("dry-run", false, "Only print what would be changed")
 	return cmd
 }
 
@@ -82,12 +88,16 @@ func revertCmd(cfg *Config) *cobra.Command {
 		Short: "Revert changes from a profile.json",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			err := revertProfile(args[0], cfg.Exclude)
+			dryRun, _ := cmd.Flags().GetBool("dry-run")
+
+			err := revertProfile(args[0], cfg.Exclude, dryRun)
 			if err != nil {
 				fmt.Printf("Error: %s\n", err)
 			}
 		},
 	}
+
+	cmd.Flags().Bool("dry-run", false, "Only print what would be changed")
 	return cmd
 }
 

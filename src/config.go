@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -15,6 +16,7 @@ import (
 var defaultConfig []byte
 
 type MergeBehavior string
+type ExcludePatterns map[string]*regexp.Regexp
 
 const (
 	MergeSoft  MergeBehavior = "soft"
@@ -22,13 +24,23 @@ const (
 	MergeForce MergeBehavior = "force"
 )
 
+func (ep *ExcludePatterns) IsExcluded(channel string, property string) bool {
+	representation := fmt.Sprintf("%s%s", channel, property)
+	for _, re := range *ep {
+		if re.MatchString(representation) {
+			return true
+		}
+	}
+	return false
+}
+
 type Config struct {
 	Version int `yaml:"version"`
 	Sync    struct {
 		Auto bool `yaml:"auto"`
 	} `yaml:"sync"`
-	Merge   MergeBehavior `yaml:"merge"`
-	Exclude []string      `yaml:"exclude"`
+	Merge   MergeBehavior   `yaml:"merge"`
+	Exclude ExcludePatterns `yaml:"exclude"`
 }
 
 func ParseMergeBehavior(value string) (MergeBehavior, error) {
@@ -56,6 +68,28 @@ func (m *MergeBehavior) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	*m = parsed
+	return nil
+}
+
+func (m *ExcludePatterns) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var patternStrings []string
+	if err := unmarshal(&patternStrings); err != nil {
+		return err
+	}
+
+	patterns := make(ExcludePatterns)
+
+	for _, pattern := range patternStrings {
+		// Compile the regular expression for each pattern
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return fmt.Errorf("invalid exclude regular expression: %s", pattern)
+		}
+
+		patterns[pattern] = re
+	}
+
+	*m = patterns
 	return nil
 }
 

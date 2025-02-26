@@ -15,7 +15,7 @@ import (
 type Profile map[string]map[string]any
 
 // TODO: return a new profile that only includes properties that were actually changed based on the merge and exclude settings.
-func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude []string) error {
+func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude ExcludePatterns, dryRun bool) error {
 	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %v", err)
@@ -28,14 +28,35 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude []str
 	}
 
 	blue := color.New(color.FgHiBlue).SprintFunc()
+	yellow := color.New(color.FgHiYellow).SprintFunc()
 
 	for channel, properties := range profile {
 		// Keys starting with X- are not channels
 		if strings.HasPrefix(channel, "X-") {
 			continue
 		}
+
 		for property, value := range properties {
-			fmt.Printf("%s Setting %s::%s ➔ %s\n", blue("•"), channel, property, value)
+			// Check if this property can be updated based on merge preferences
+
+			if exclude.IsExcluded(channel, property) {
+				fmt.Printf("%s Skipping excluded property %s%s\n", yellow("•"), channel, property)
+				continue
+			}
+
+			dryRunNotice := ""
+			if dryRun {
+				dryRunNotice = " (skipping due to dry run)"
+			}
+
+			fmt.Printf("%s Setting %s%s ➔ %s%s\n", blue("•"), channel, property, value, dryRunNotice)
+
+			if dryRun {
+				continue
+			}
+
+			// We can definitely set this property now
+
 			cmd := exec.Command("xfconf-query", "-c", channel, "--property", property, "--type", "string", "--create", "--set", fmt.Sprintf("%v", value))
 
 			output, err := cmd.CombinedOutput()
@@ -48,7 +69,7 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude []str
 	return nil
 }
 
-func revertProfile(profilePath string, exclude []string) error {
+func revertProfile(profilePath string, exclude ExcludePatterns, dryRun bool) error {
 	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %v", err)
@@ -60,6 +81,7 @@ func revertProfile(profilePath string, exclude []string) error {
 		return fmt.Errorf("failed to parse JSON: %v", err)
 	}
 
+	blue := color.New(color.FgHiBlue).SprintFunc()
 	yellow := color.New(color.FgHiYellow).SprintFunc()
 
 	for channel, properties := range profile {
@@ -69,7 +91,24 @@ func revertProfile(profilePath string, exclude []string) error {
 		}
 
 		for property := range properties {
-			fmt.Printf("%s Resetting %s::%s\n", yellow("•"), channel, property)
+			// Check if this property can be updated based on merge preferences
+
+			if exclude.IsExcluded(channel, property) {
+				fmt.Printf("%s Skipping excluded property %s%s\n", yellow("•"), channel, property)
+				continue
+			}
+
+			dryRunNotice := ""
+			if dryRun {
+				dryRunNotice = " (skipping due to dry run)"
+			}
+
+			if dryRun {
+				continue
+			}
+
+			// We can definitely set this property now
+			fmt.Printf("%s Resetting %s%s%s\n", blue("•"), channel, property, dryRunNotice)
 			cmd := exec.Command("xfconf-query", "-c", channel, "--reset", "--property", property)
 
 			output, err := cmd.CombinedOutput()
@@ -132,7 +171,7 @@ func compareFiles(file1, file2 string) (bool, error) {
 	return string(data1) == string(data2), nil
 }
 
-func syncProfile(distConfig string, mergeBehavior MergeBehavior, exclude []string) error {
+func syncProfile(distConfig string, mergeBehavior MergeBehavior, exclude ExcludePatterns, dryRun bool) error {
 	stateDirPath, err := ensureStateDir()
 	if err != nil {
 		return err
@@ -167,7 +206,7 @@ func syncProfile(distConfig string, mergeBehavior MergeBehavior, exclude []strin
 	// First run: initialize current directory
 	if _, err := os.Stat(currentDir); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Empty state")
-		if err := applyProfile(distConfig, mergeBehavior, exclude); err != nil {
+		if err := applyProfile(distConfig, mergeBehavior, exclude, dryRun); err != nil {
 			return err
 		}
 		if err := os.MkdirAll(currentDir, 0755); err != nil {
@@ -204,10 +243,10 @@ func syncProfile(distConfig string, mergeBehavior MergeBehavior, exclude []strin
 
 	if !identical {
 		fmt.Println("Configurations differ -- reverting old and applying new")
-		if err := revertProfile(previousConfig, exclude); err != nil {
+		if err := revertProfile(previousConfig, exclude, dryRun); err != nil {
 			return err
 		}
-		if err := applyProfile(currentConfig, mergeBehavior, exclude); err != nil {
+		if err := applyProfile(currentConfig, mergeBehavior, exclude, dryRun); err != nil {
 			return err
 		}
 	} else {
