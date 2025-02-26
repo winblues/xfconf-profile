@@ -1,0 +1,14 @@
+version: 1
+
+# To completely disable the sync feature that winblues uses on login,
+# set this to false
+sync:
+  enable: true
+
+merge:
+
+# List of properties to exclude.
+# Example:
+#   exclude:
+#     - "xsettings::*"
+exclude: []

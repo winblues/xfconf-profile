@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 // Version imformation overriden using ldflags
@@ -12,6 +13,29 @@ var (
 	commit  = "none"
 	date    = "unknown"
 )
+
+func syncCmd(cfg *Config) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "sync",
+		Short: "Sync user profile with distribution's recommended profile",
+		Run: func(cmd *cobra.Command, args []string) {
+			if !cfg.Sync.Enable {
+				fmt.Println("Skipping sync -- disabled in user config")
+				return
+			}
+
+			distProfile, _ := cmd.Flags().GetString("profile")
+			if err := syncProfile(distProfile); err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
+			}
+		},
+	}
+
+	cmd.Flags().StringP("profile", "p", "/usr/share/xfconf-profile/default.json", "Path to the distribution's recommended profile")
+	return cmd
+}
+
 var applyCmd = &cobra.Command{
 	Use:   "apply [path]",
 	Short: "Apply changes from a profile.json",
@@ -44,18 +68,6 @@ var recordCmd = &cobra.Command{
 	},
 }
 
-var syncCmd = &cobra.Command{
-	Use:   "sync",
-	Short: "Sync user profile with distribution's recommended profile",
-	Run: func(cmd *cobra.Command, args []string) {
-		distProfile, _ := cmd.Flags().GetString("profile")
-		if err := syncProfile(distProfile); err != nil {
-			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-			os.Exit(1)
-		}
-	},
-}
-
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version information",
@@ -66,16 +78,19 @@ var versionCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	syncCmd.Flags().StringP("profile", "p", "/usr/share/xfconf-profile/default.json", "Path to the distribution's recommended profile")
-}
-
 func main() {
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
+		os.Exit(1)
+	}
+
 	var rootCmd = &cobra.Command{
 		Use:   "xfconf-profile",
 		Short: "Tool for applying, reverting and managing Xfce profiles",
 	}
-	rootCmd.AddCommand(applyCmd, revertCmd, recordCmd, syncCmd, versionCmd)
+
+	rootCmd.AddCommand(applyCmd, revertCmd, recordCmd, syncCmd(config), versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
