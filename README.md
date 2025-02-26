@@ -18,7 +18,7 @@ Given a `profile.json` file such as:
 }
 
 ```
-Applying and reverting the changes from the profile:
+You can apply (and revert) the changes to properties from the profile:
 ```bash
 $ xfconf-profile apply profile.json
 • Setting xsettings/Net/ThemeName ➔ Chicago95
