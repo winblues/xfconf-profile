@@ -76,16 +76,19 @@ func applyCmd(cfg *Config) *cobra.Command {
 	return cmd
 }
 
-var revertCmd = &cobra.Command{
-	Use:   "revert [path]",
-	Short: "Revert changes from a profile.json",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		err := revertProfile(args[0])
-		if err != nil {
-			fmt.Printf("Error: %s\n", err)
-		}
-	},
+func revertCmd(cfg *Config) *cobra.Command {
+	var cmd = &cobra.Command{
+		Use:   "revert [path]",
+		Short: "Revert changes from a profile.json",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			err := revertProfile(args[0], cfg.Exclude)
+			if err != nil {
+				fmt.Printf("Error: %s\n", err)
+			}
+		},
+	}
+	return cmd
 }
 
 var recordCmd = &cobra.Command{
@@ -118,7 +121,7 @@ func main() {
 		Short: "Tool for applying, reverting and managing Xfce profiles",
 	}
 
-	rootCmd.AddCommand(applyCmd(config), revertCmd, recordCmd, syncCmd(config), versionCmd)
+	rootCmd.AddCommand(applyCmd(config), revertCmd(config), recordCmd, syncCmd(config), versionCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

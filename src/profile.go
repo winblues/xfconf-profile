@@ -12,6 +12,8 @@ import (
 	"github.com/fatih/color"
 )
 
+type Profile map[string]map[string]any
+
 // TODO: return a new profile that only includes properties that were actually changed based on the merge and exclude settings.
 func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude []string) error {
 	data, err := os.ReadFile(profilePath)
@@ -19,7 +21,7 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude []str
 		return fmt.Errorf("failed to read file: %v", err)
 	}
 
-	var profile map[string]map[string]interface{}
+	var profile Profile
 	err = json.Unmarshal(data, &profile)
 	if err != nil {
 		return fmt.Errorf("failed to parse JSON: %v", err)
@@ -46,13 +48,13 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude []str
 	return nil
 }
 
-func revertProfile(profilePath string) error {
+func revertProfile(profilePath string, exclude []string) error {
 	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %v", err)
 	}
 
-	var profile map[string]map[string]interface{}
+	var profile Profile
 	err = json.Unmarshal(data, &profile)
 	if err != nil {
 		return fmt.Errorf("failed to parse JSON: %v", err)
@@ -202,7 +204,7 @@ func syncProfile(distConfig string, mergeBehavior MergeBehavior, exclude []strin
 
 	if !identical {
 		fmt.Println("Configurations differ -- reverting old and applying new")
-		if err := revertProfile(previousConfig); err != nil {
+		if err := revertProfile(previousConfig, exclude); err != nil {
 			return err
 		}
 		if err := applyProfile(currentConfig, mergeBehavior, exclude); err != nil {
