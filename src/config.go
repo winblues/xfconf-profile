@@ -2,9 +2,11 @@ package main
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -12,13 +14,49 @@ import (
 //go:embed assets/config.yml
 var defaultConfig []byte
 
+type MergeBehavior string
+
+const (
+	MergeSoft  MergeBehavior = "soft"
+	MergeHard  MergeBehavior = "hard"
+	MergeForce MergeBehavior = "force"
+)
+
 type Config struct {
 	Version int `yaml:"version"`
 	Sync    struct {
 		Auto bool `yaml:"auto"`
 	} `yaml:"sync"`
-	Merge   string   `yaml:"merge"`
-	Exclude []string `yaml:"exclude"`
+	Merge   MergeBehavior `yaml:"merge"`
+	Exclude []string      `yaml:"exclude"`
+}
+
+func ParseMergeBehavior(value string) (MergeBehavior, error) {
+	switch strings.ToLower(value) {
+	case "soft":
+		return MergeSoft, nil
+	case "hard":
+		return MergeHard, nil
+	case "force":
+		return MergeForce, nil
+	default:
+		return "", errors.New("invalid merge behavior: must be 'soft', 'hard', or 'force'")
+	}
+}
+
+func (m *MergeBehavior) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var raw string
+	if err := unmarshal(&raw); err != nil {
+		return err
+	}
+
+	parsed, err := ParseMergeBehavior(raw)
+	if err != nil {
+		return err
+	}
+
+	*m = parsed
+	return nil
 }
 
 func getConfigPath() string {

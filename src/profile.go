@@ -12,8 +12,8 @@ import (
 	"github.com/fatih/color"
 )
 
-// TODO: return a new profile that only includes properties that were actually changed based on the user's merge options / current settings.
-func applyProfile(profilePath string) error {
+// TODO: return a new profile that only includes properties that were actually changed based on the merge and exclude settings.
+func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude []string) error {
 	data, err := os.ReadFile(profilePath)
 	if err != nil {
 		return fmt.Errorf("failed to read file: %v", err)
@@ -130,7 +130,7 @@ func compareFiles(file1, file2 string) (bool, error) {
 	return string(data1) == string(data2), nil
 }
 
-func syncProfile(distConfig string) error {
+func syncProfile(distConfig string, mergeBehavior MergeBehavior, exclude []string) error {
 	stateDirPath, err := ensureStateDir()
 	if err != nil {
 		return err
@@ -165,7 +165,7 @@ func syncProfile(distConfig string) error {
 	// First run: initialize current directory
 	if _, err := os.Stat(currentDir); errors.Is(err, os.ErrNotExist) {
 		fmt.Println("Empty state")
-		if err := applyProfile(distConfig); err != nil {
+		if err := applyProfile(distConfig, mergeBehavior, exclude); err != nil {
 			return err
 		}
 		if err := os.MkdirAll(currentDir, 0755); err != nil {
@@ -205,7 +205,7 @@ func syncProfile(distConfig string) error {
 		if err := revertProfile(previousConfig); err != nil {
 			return err
 		}
-		if err := applyProfile(currentConfig); err != nil {
+		if err := applyProfile(currentConfig, mergeBehavior, exclude); err != nil {
 			return err
 		}
 	} else {
