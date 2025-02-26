@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -13,6 +15,8 @@ var (
 	commit  = "none"
 	date    = "unknown"
 )
+
+var logger *slog.Logger
 
 // Select a merge behavior either from the user's config or command-line flag
 func chooseMergeBehavior(cfg *Config, flag string) MergeBehavior {
@@ -72,7 +76,8 @@ func applyCmd(cfg *Config) *cobra.Command {
 
 			err := applyProfile(args[0], mergeBehavior, cfg.Exclude, dryRun)
 			if err != nil {
-				fmt.Printf("Error: %s\n", err)
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
 			}
 		},
 	}
@@ -92,7 +97,8 @@ func revertCmd(cfg *Config) *cobra.Command {
 
 			err := revertProfile(args[0], cfg.Exclude, dryRun)
 			if err != nil {
-				fmt.Printf("Error: %s\n", err)
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
 			}
 		},
 	}
@@ -119,7 +125,61 @@ var versionCmd = &cobra.Command{
 	},
 }
 
+func getDefaultCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "get-default <channel> <property>",
+		Short: "Query xfconfd for the default value of a given property",
+		Args:  cobra.ExactArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
+			channel := args[0]
+			property := args[1]
+
+			query := map[string][]string{
+				channel: {property},
+			}
+
+			defaultValues, err := gatherDefaultPropertyValues(query)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
+			}
+
+			defaultValue := defaultValues[channel][property]
+			fmt.Println(defaultValue)
+		},
+	}
+
+	return cmd
+}
+
+func initLogger() {
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel == "" {
+		logLevel = "INFO"
+	}
+	var level slog.Level
+	switch strings.ToUpper(logLevel) {
+	case "DEBUG":
+		level = slog.LevelDebug
+	case "INFO":
+		level = slog.LevelInfo
+	case "WARN":
+		level = slog.LevelWarn
+	case "ERROR":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
+
+	handler := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: level})
+
+	logger = slog.New(handler)
+}
+
 func main() {
+	initLogger()
+
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
@@ -131,7 +191,7 @@ func main() {
 		Short: "Tool for applying, reverting and managing Xfce profiles",
 	}
 
-	rootCmd.AddCommand(applyCmd(config), revertCmd(config), recordCmd, syncCmd(config), versionCmd)
+	rootCmd.AddCommand(applyCmd(config), revertCmd(config), recordCmd, syncCmd(config), versionCmd, getDefaultCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
