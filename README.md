@@ -5,7 +5,7 @@ xfconf-profile is a command-line tool to manage Xfce settings using `xfconf-quer
 
 ## Example usage
 
-Given a simple `profile.json` file:
+Given a `profile.json` file such as:
 ```json
 {
   "xsettings": {
@@ -21,14 +21,14 @@ Given a simple `profile.json` file:
 Applying and reverting the changes from the profile:
 ```bash
 $ xfconf-profile apply profile.json
-• Setting xsettings::/Net/ThemeName ➔ Chicago95
-• Setting xsettings::/Net/IconThemeName ➔ Chicago95
-• Setting xfwm4::/general/theme ➔ Chicago95
+• Setting xsettings/Net/ThemeName ➔ Chicago95
+• Setting xsettings/Net/IconThemeName ➔ Chicago95
+• Setting xfwm4/general/theme ➔ Chicago95
 
 $ xfconf-profile revert profile.json
-• Resetting xfwm4::/general/theme
-• Resetting xsettings::/Net/IconThemeName
-• Resetting xsettings::/Net/ThemeName
+• Resetting xfwm4/general/theme
+• Resetting xsettings/Net/IconThemeName
+• Resetting xsettings/Net/ThemeName
 ```
 
 ## Installation
