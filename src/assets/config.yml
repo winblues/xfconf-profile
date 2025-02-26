@@ -4,12 +4,12 @@ version: 1
 sync:
   auto: true
 
-# Default merge behavior for properties
+# Merge behavior for applying properties
 # Options are:
 #   - soft:  Only change properties if they are set to their default values.
 #            This is the default behavior as it preserves changes to properties
 #            that users have manually configured.
-#   - hard:  Change all properties not explictly excluded
+#   - hard:  Change all properties not explicitly excluded
 #   - force: Change all propertiess
 merge: "soft"
 

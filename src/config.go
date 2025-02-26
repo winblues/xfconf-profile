@@ -17,7 +17,7 @@ type Config struct {
 	Sync    struct {
 		Auto bool `yaml:"auto"`
 	} `yaml:"sync"`
-	Merge   struct{} `yaml:"merge"`
+	Merge   string   `yaml:"merge"`
 	Exclude []string `yaml:"exclude"`
 }
 
