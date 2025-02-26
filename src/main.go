@@ -129,7 +129,14 @@ func getDefaultCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-default <channel> <property>",
 		Short: "Query xfconfd for the default value of a given property",
-		Args:  cobra.ExactArgs(2),
+		Long: `Query xfconfd for the default value of a given property
+
+      If the property does not exist, the command will return nothing on stdout and
+      exit with code 127.
+
+      Default values are found using xfconf-query on the distribution's provided Xfce settings,
+      either found in /usr/etc/xdg or /etc/xdg.`,
+		Args: cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			channel := args[0]
 			property := args[1]
@@ -145,7 +152,11 @@ func getDefaultCmd() *cobra.Command {
 			}
 
 			defaultValue := defaultValues[channel][property]
-			fmt.Println(defaultValue)
+			if defaultValue != "" {
+				fmt.Println(defaultValue)
+			} else {
+				os.Exit(127)
+			}
 		},
 	}
 

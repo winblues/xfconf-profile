@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -25,13 +26,12 @@ func gatherDefaultPropertyValuesFromConfig(queries map[string][]string, configDi
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Start a single dbus-run-session and xfconfd inside a shell session
+	// Start a single dbus-run-session and run xfconfd inside a shell session
 	sessionCmd := fmt.Sprintf(
 		"XDG_CONFIG_HOME='%s' %s & while ! xfconf-query --channel xfce4-panel --list >/dev/null 2>&1; do sleep 0.05; done; exec sh", configDir, xfconfdPath)
 
 	logger.Debug("Launching xfconfd in its own dbus session", "cmd", sessionCmd)
 
-	// Create command to start dbus-run-session with an interactive shell
 	cmd := exec.CommandContext(ctx, "dbus-run-session", "--", "sh", "-c", sessionCmd)
 
 	// Create pipes for communicating with the shell
@@ -61,7 +61,7 @@ func gatherDefaultPropertyValuesFromConfig(queries map[string][]string, configDi
 		results[channel] = make(map[string]string)
 
 		for _, property := range properties {
-			queryCmd := fmt.Sprintf("xfconf-query --channel %q --property %q\n", channel, property)
+			queryCmd := fmt.Sprintf("xfconf-query --channel %q --property %q 2>&1\n", channel, property)
 
 			// Send query to running shell
 			_, err := stdin.Write([]byte(queryCmd))
@@ -69,10 +69,12 @@ func gatherDefaultPropertyValuesFromConfig(queries map[string][]string, configDi
 				return nil, fmt.Errorf("failed to write to dbus-run-session: %v", err)
 			}
 
-			if scanner.Scan() {
-				results[channel][property] = scanner.Text()
-			} else {
+			scanner.Scan()
+			queryResult := scanner.Text()
+			if strings.Contains(queryResult, "does not exist on channel") {
 				results[channel][property] = "" // Handle missing properties
+			} else {
+				results[channel][property] = queryResult
 			}
 		}
 	}
