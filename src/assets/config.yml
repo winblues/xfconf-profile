@@ -3,8 +3,10 @@ version: 1
 # Merge behavior for applying properties
 # Options are:
 #   - soft:  Only change properties if they are set to their default values.
-#            This is the default behavior as it preserves changes to properties
-#            that users have manually configured.
+#            This is the default behavior because it preserves changes to properties
+#            that users have manually configured. If there is no default value
+#            for a given property, then it is treated as if the current value
+#            is its default value.
 #   - hard:  Change all properties not explicitly excluded
 #   - force: Change all propertiess
 merge: "soft"

@@ -32,7 +32,7 @@ func chooseMergeBehavior(cfg *Config, flag string) MergeBehavior {
 	}
 }
 
-func syncCmd(cfg *Config) *cobra.Command {
+func createSyncCmd(cfg *Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sync",
 		Short: "Sync user profile with distribution's recommended profile",
@@ -63,7 +63,7 @@ func syncCmd(cfg *Config) *cobra.Command {
 	return cmd
 }
 
-func applyCmd(cfg *Config) *cobra.Command {
+func createApplyCmd(cfg *Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "apply [path]",
 		Short: "Apply changes from a profile.json",
@@ -87,7 +87,7 @@ func applyCmd(cfg *Config) *cobra.Command {
 	return cmd
 }
 
-func revertCmd(cfg *Config) *cobra.Command {
+func createRevertCmd(cfg *Config) *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "revert [path]",
 		Short: "Revert changes from a profile.json",
@@ -109,7 +109,7 @@ func revertCmd(cfg *Config) *cobra.Command {
 
 var recordCmd = &cobra.Command{
 	Use:   "record",
-	Short: "Record changes to xfconf properties and dump them as a profile on SIGINT",
+	Short: "Record changes to xfconf properties and dump them as a profile",
 	Run: func(cmd *cobra.Command, args []string) {
 		recordProfile()
 	},
@@ -125,7 +125,7 @@ var versionCmd = &cobra.Command{
 	},
 }
 
-func getDefaultCmd() *cobra.Command {
+func createGetDefaultCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-default <channel> <property>",
 		Short: "Query xfconfd for the default value of a given property",
@@ -202,7 +202,17 @@ func main() {
 		Short: "Tool for applying, reverting and managing Xfce profiles",
 	}
 
-	rootCmd.AddCommand(applyCmd(config), revertCmd(config), recordCmd, syncCmd(config), versionCmd, getDefaultCmd())
+	applyCmd := createApplyCmd(config)
+	revertCmd := createRevertCmd(config)
+	syncCmd := createSyncCmd(config)
+	getDefaultCmd := createGetDefaultCmd()
+
+	rootCmd.AddGroup(&cobra.Group{ID: "profile", Title: "Profile Management"})
+	applyCmd.GroupID = "profile"
+	revertCmd.GroupID = "profile"
+	syncCmd.GroupID = "profile"
+	recordCmd.GroupID = "profile"
+	rootCmd.AddCommand(applyCmd, revertCmd, syncCmd, getDefaultCmd, versionCmd, recordCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
