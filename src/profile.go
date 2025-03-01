@@ -12,7 +12,11 @@ import (
 	"github.com/fatih/color"
 )
 
-type Profile map[string]map[string]any
+type Properties map[string]map[string]string
+
+type Profile struct {
+	Properties Properties `json:"properties"`
+}
 
 // TODO: return a new profile that only includes properties that were actually changed based on the merge and exclude settings.
 func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude ExcludePatterns, dryRun bool) error {
@@ -32,7 +36,7 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude Exclu
 
 	// Get all the default values
 	defaultValueQueries := make(map[string][]string)
-	for channel, properties := range profile {
+	for channel, properties := range profile.Properties {
 		defaultValueQueries[channel] = []string{}
 		for property, _ := range properties {
 			defaultValueQueries[channel] = append(defaultValueQueries[channel], property)
@@ -49,7 +53,7 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude Exclu
 		return fmt.Errorf("could not get current property values: %v", err)
 	}
 
-	for channel, properties := range profile {
+	for channel, properties := range profile.Properties {
 		// Keys starting with X- are not channels
 		if strings.HasPrefix(channel, "X-") {
 			continue
@@ -115,7 +119,7 @@ func revertProfile(profilePath string, exclude ExcludePatterns, dryRun bool) err
 	blue := color.New(color.FgHiBlue).SprintFunc()
 	yellow := color.New(color.FgHiYellow).SprintFunc()
 
-	for channel, properties := range profile {
+	for channel, properties := range profile.Properties {
 		// Keys starting with X- are not channels
 		if strings.HasPrefix(channel, "X-") {
 			continue
