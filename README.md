@@ -8,15 +8,21 @@ xfconf-profile is a command-line tool to manage Xfce settings using `xfconf-quer
 Given a `profile.json` file such as:
 ```json
 {
-  "xsettings": {
-    "/Net/ThemeName": "Chicago95",
-    "/Net/IconThemeName": "Chicago95"
+  "properties": {
+    "xsettings": {
+      "/Net/ThemeName": "Chicago95",
+      "/Net/IconThemeName": "Chicago95"
+    },
+    "xfwm4": {
+      "/general/theme": "Chicago95"
+    }
   },
-  "xfwm4": {
-    "/general/theme": "Chicago95"
+  {
+  "metadata": {
+    "name": "winblues-blue95",
+    "version": 1
   }
 }
-
 ```
 You can apply (and revert) the changes to properties from the profile:
 ```bash
