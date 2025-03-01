@@ -17,7 +17,6 @@ Given a `profile.json` file such as:
       "/general/theme": "Chicago95"
     }
   },
-  {
   "metadata": {
     "name": "winblues-blue95",
     "version": 1
