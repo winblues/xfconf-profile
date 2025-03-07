@@ -122,11 +122,11 @@ func gatherDefaultPropertyValues(queries map[string][]string) (map[string]map[st
 	return gatherDefaultPropertyValuesFromConfig(queries, configDir)
 }
 
-func gatherCurrentPropertyValues(queries map[string][]string) (map[string]map[string]string, error) {
-	results := make(map[string]map[string]string)
+func gatherCurrentPropertyValues(queries map[string][]string) (map[string]map[string]any, error) {
+	results := make(map[string]map[string]any)
 
 	for channel, properties := range queries {
-		results[channel] = make(map[string]string)
+		results[channel] = make(map[string]any)
 
 		for _, property := range properties {
 			cmd := exec.Command("xfconf-query", "--channel", channel, "--property", property)

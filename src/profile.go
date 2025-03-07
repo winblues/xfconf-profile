@@ -12,7 +12,7 @@ import (
 	"github.com/fatih/color"
 )
 
-type Properties map[string]map[string]string
+type Properties map[string]map[string]any
 
 type Profile struct {
 	Properties Properties `json:"properties"`
@@ -84,15 +84,26 @@ func applyProfile(profilePath string, mergeBehavior MergeBehavior, exclude Exclu
 				dryRunNotice = " (skipping due to dry run)"
 			}
 
-			fmt.Printf("%s Setting %s%s ➔ %s%s\n", blue("•"), channel, property, value, dryRunNotice)
+			fmt.Printf("%s Setting %s%s ➔ %s%s\n", blue("•"), channel, property, fmt.Sprintf("%v", value), dryRunNotice)
 
 			if dryRun {
 				continue
 			}
 
 			// We can definitely set this property now
-
-			cmd := exec.Command("xfconf-query", "-c", channel, "--property", property, "--type", "string", "--create", "--set", fmt.Sprintf("%v", value))
+			var cmd *exec.Cmd
+			switch v := value.(type) {
+			case string:
+				cmd = exec.Command("xfconf-query", "-c", channel, "--property", property, "--type", "string", "--create", "--set", v)
+			case bool:
+				boolValue := "false"
+				if v {
+					boolValue = "true"
+				}
+				cmd = exec.Command("xfconf-query", "-c", channel, "--property", property, "--type", "bool", "--create", "--set", boolValue)
+			default:
+				return fmt.Errorf("unsupported value type for property %s: %T", property, value)
+			}
 
 			output, err := cmd.CombinedOutput()
 			if err != nil {
